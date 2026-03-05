@@ -256,7 +256,7 @@ export function TitanchefPaymentForm({ visible, totalAmount, personalInfo, addre
       }
 
       if (data.success && data.pixData) {
-        const params = new URLSearchParams({
+        sessionStorage.setItem("pixData", JSON.stringify({
           code: data.pixData.code,
           qr: data.pixData.qrCodeUrl,
           amount: finalTotal.toString(),
@@ -269,8 +269,8 @@ export function TitanchefPaymentForm({ visible, totalAmount, personalInfo, addre
           city: addressInfo.cidade,
           state: addressInfo.estado,
           cep: addressInfo.cep,
-        })
-        router.push(`/titanchef-pix-payment?${params.toString()}`)
+        }))
+        router.push(`/titanchef-pix-payment`)
       } else {
         setPaymentError("Erro ao gerar código PIX")
         setIsProcessing(false)
@@ -340,6 +340,7 @@ export function TitanchefPaymentForm({ visible, totalAmount, personalInfo, addre
           amount: finalTotal,
           paymentMethodType: "card",
           card_hash: cardHash,
+          card_brand: detectedBrand || "visa",
           dfp_id: dfpId,
           installments: parseInt(parcelas),
           customer_name: personalInfo.nome,

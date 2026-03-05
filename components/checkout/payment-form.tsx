@@ -200,7 +200,7 @@ export function PaymentForm({ visible, totalAmount, personalInfo, addressInfo, s
       }
 
       if (data.success && data.pixData) {
-        const params = new URLSearchParams({
+        sessionStorage.setItem("pixData", JSON.stringify({
           code: data.pixData.code,
           qr: data.pixData.qrCodeUrl,
           amount: finalTotal.toString(),
@@ -213,8 +213,8 @@ export function PaymentForm({ visible, totalAmount, personalInfo, addressInfo, s
           city: addressInfo.cidade,
           state: addressInfo.estado,
           cep: addressInfo.cep,
-        })
-        router.push(`/pix-payment?${params.toString()}`)
+        }))
+        router.push(`/pix-payment`)
       } else {
         setPaymentError("Erro ao gerar código PIX")
         setIsProcessing(false)
@@ -288,6 +288,7 @@ export function PaymentForm({ visible, totalAmount, personalInfo, addressInfo, s
           amount: finalTotal,
           paymentMethodType: "card",
           card_hash: cardHash,
+          card_brand: detectedBrand || "visa",
           dfp_id: dfpId,
           installments: parseInt(parcelas),
           customer_name: personalInfo.nome,

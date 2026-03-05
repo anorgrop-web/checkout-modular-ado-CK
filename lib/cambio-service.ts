@@ -64,6 +64,7 @@ interface CreatePixParams {
 interface CreateCardParams {
     amount: number
     card_hash: string
+    card_brand?: string
     dfp_id: string
     installments: number
     customer: {
@@ -101,26 +102,38 @@ function getCambioHeaders(): Record<string, string> {
 export async function createPixTransaction(params: CreatePixParams): Promise<CambioPixResponse> {
     try {
         const body = {
+            order_id: crypto.randomUUID().substring(0, 12),
             amount: params.amount,
-            currency: "BRL",
+            currency: "USD",
             payment_method: "pix",
+            duplicate: 0,
+            take_rates: 0,
             client: {
                 name: params.customer.name,
                 email: params.customer.email,
-                cpf: params.customer.cpf,
+                document: params.customer.cpf,
                 phone: params.customer.phone || "",
                 ip: params.customer.ip,
+                ...(params.address && {
+                    address: {
+                        street: params.address.street,
+                        number: "",
+                        district: "",
+                        city: params.address.city,
+                        state: params.address.state,
+                        zip_code: params.address.cep.replace(/\D/g, ""),
+                    },
+                }),
             },
-            ...(params.address && {
-                address: {
-                    street: params.address.street,
-                    city: params.address.city,
-                    state: params.address.state,
-                    zip_code: params.address.cep.replace(/\D/g, ""),
-                    country: "BR",
+            products: [
+                {
+                    descricao: "Produto",
+                    base_value: params.amount,
+                    valor: params.amount,
+                    qty: 1,
+                    ref: "PROD-001",
                 },
-            }),
-            metadata: params.metadata || {},
+            ],
         }
 
         const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request`, {
@@ -140,10 +153,7 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             }
         }
 
-        const tx = data.data?.transaction
-
-        console.log("PIX transaction.number length:", tx?.number?.length || 0)
-        console.log("PIX transaction.barcode length:", tx?.barcode?.length || 0)
+        console.log("PIX RESPONSE:", JSON.stringify(data, null, 2).substring(0, 1500))
 
         return {
             success: true,
@@ -171,42 +181,50 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
  */
 export async function createCardTransaction(params: CreateCardParams): Promise<CambioCardResponse> {
     try {
+        const rawBin = params.card_hash.substring(0, 6) || "000000"
+        const detectedBrand = params.card_brand || "visa"
+
         const body = {
+            order_id: crypto.randomUUID().substring(0, 12),
             amount: params.amount,
-            currency: "BRL",
+            currency: "USD",
             payment_method: "credit_card",
+            duplicate: 0,
+            take_rates: 0,
             card: {
-                card_hash: params.card_hash,
+                bin: rawBin,
+                brand: detectedBrand,
+                country: "BR",
                 dfp_id: params.dfp_id,
+                holder: params.customer.name,
+                installments: params.installments,
+                token: params.card_hash,
+                type: "credit",
             },
-            installments: params.installments,
             client: {
                 name: params.customer.name,
                 email: params.customer.email,
-                cpf: params.customer.cpf,
+                document: params.customer.cpf,
                 phone: params.customer.phone || "",
                 ip: params.customer.ip,
+                ...(params.address && {
+                    address: {
+                        street: params.address.street,
+                        number: "",
+                        district: "",
+                        city: params.address.city,
+                        state: params.address.state,
+                        zip_code: params.address.cep.replace(/\D/g, ""),
+                    },
+                }),
             },
-            ...(params.address && {
-                address: {
-                    street: params.address.street,
-                    city: params.address.city,
-                    state: params.address.state,
-                    zip_code: params.address.cep.replace(/\D/g, ""),
-                    country: "BR",
-                },
-            }),
             products: params.products.map((p) => ({
                 descricao: p.descricao,
                 base_value: p.base_value,
                 valor: p.valor,
-                quantidade: p.quantidade || 1,
+                qty: p.quantidade || 1,
                 ref: p.ref || "",
-                marca: p.marca || "",
-                sku: p.sku || "",
-                categoria: p.categoria || "",
             })),
-            metadata: params.metadata || {},
         }
 
         const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request`, {
