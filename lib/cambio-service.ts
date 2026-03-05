@@ -1,6 +1,7 @@
 /**
  * Serviço de integração com a API CambioReal (CambioCheckout).
- * Centraliza autenticação, criação de transações (PIX e cartão) e consulta de status.
+ * Centraliza criação de transações (PIX e cartão) e consulta de status.
+ * Autenticação via headers X-APP-ID e X-APP-SECRET em cada request.
  */
 
 const CAMBIO_API_URL = process.env.CAMBIO_API_URL || "https://sandbox.cambioreal.com"
@@ -83,25 +84,15 @@ interface CreateCardParams {
 }
 
 /**
- * Obtém token de autenticação da CambioReal.
+ * Retorna os headers de autenticação para a API CambioReal.
+ * A autenticação é feita via headers X-APP-ID e X-APP-SECRET em cada request.
  */
-async function authenticate(): Promise<string> {
-    const response = await fetch(`${CAMBIO_API_URL}/service/v1/auth/token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            app_id: CAMBIO_APP_ID,
-            app_secret: CAMBIO_APP_SECRET,
-        }),
-    })
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(`Falha na autenticação CambioReal: ${errorData.message || response.statusText}`)
+function getCambioHeaders(): Record<string, string> {
+    return {
+        "X-APP-ID": CAMBIO_APP_ID,
+        "X-APP-SECRET": CAMBIO_APP_SECRET,
+        "Content-Type": "application/json",
     }
-
-    const data = await response.json()
-    return data.token || data.access_token
 }
 
 /**
@@ -109,8 +100,6 @@ async function authenticate(): Promise<string> {
  */
 export async function createPixTransaction(params: CreatePixParams): Promise<CambioPixResponse> {
     try {
-        const token = await authenticate()
-
         const body = {
             amount: params.amount,
             currency: "BRL",
@@ -134,12 +123,9 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             metadata: params.metadata || {},
         }
 
-        const response = await fetch(`${CAMBIO_API_URL}/service/v1/baas/transactions`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getCambioHeaders(),
             body: JSON.stringify(body),
         })
 
@@ -184,8 +170,6 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
  */
 export async function createCardTransaction(params: CreateCardParams): Promise<CambioCardResponse> {
     try {
-        const token = await authenticate()
-
         const body = {
             amount: params.amount,
             currency: "BRL",
@@ -224,12 +208,9 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
             metadata: params.metadata || {},
         }
 
-        const response = await fetch(`${CAMBIO_API_URL}/service/v1/baas/transactions`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getCambioHeaders(),
             body: JSON.stringify(body),
         })
 
@@ -269,13 +250,9 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
  */
 export async function getTransactionStatus(transactionId: string): Promise<CambioStatusResponse> {
     try {
-        const token = await authenticate()
-
-        const response = await fetch(`${CAMBIO_API_URL}/service/v1/baas/transactions/${transactionId}`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/${transactionId}`, {
             method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: getCambioHeaders(),
         })
 
         const data = await response.json()
