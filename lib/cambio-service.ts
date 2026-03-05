@@ -123,13 +123,20 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             metadata: params.metadata || {},
         }
 
+        console.log("[v0] CambioReal PIX URL:", `${CAMBIO_API_URL}/service/v2/checkout`)
+        console.log("[v0] CambioReal PIX Headers:", JSON.stringify({ "X-APP-ID": CAMBIO_APP_ID ? "SET" : "EMPTY", "X-APP-SECRET": CAMBIO_APP_SECRET ? "SET" : "EMPTY" }))
+
         const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout`, {
             method: "POST",
             headers: getCambioHeaders(),
             body: JSON.stringify(body),
         })
 
-        const data = await response.json()
+        const responseText = await response.text()
+        console.log("[v0] CambioReal PIX Response Status:", response.status)
+        console.log("[v0] CambioReal PIX Response Body (first 200 chars):", responseText.substring(0, 200))
+
+        const data = JSON.parse(responseText)
 
         if (!response.ok) {
             return {
@@ -208,13 +215,20 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
             metadata: params.metadata || {},
         }
 
+        console.log("[v0] CambioReal Card URL:", `${CAMBIO_API_URL}/service/v2/checkout`)
+        console.log("[v0] CambioReal Card Headers:", JSON.stringify({ "X-APP-ID": CAMBIO_APP_ID ? "SET" : "EMPTY", "X-APP-SECRET": CAMBIO_APP_SECRET ? "SET" : "EMPTY" }))
+
         const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout`, {
             method: "POST",
             headers: getCambioHeaders(),
             body: JSON.stringify(body),
         })
 
-        const data = await response.json()
+        const responseText = await response.text()
+        console.log("[v0] CambioReal Card Response Status:", response.status)
+        console.log("[v0] CambioReal Card Response Body (first 200 chars):", responseText.substring(0, 200))
+
+        const data = JSON.parse(responseText)
 
         if (!response.ok) {
             return {
