@@ -34,7 +34,8 @@ export default async function SuccessPage({ searchParams }: PageProps) {
             alt="TitanChef"
             width={60}
             height={40}
-            className="h-10 w-auto"
+            className="h-10"
+            style={{ width: 'auto' }}
           />
         </div>
       </header>
@@ -154,7 +155,8 @@ export default async function SuccessPage({ searchParams }: PageProps) {
                   alt={method.name}
                   width={40}
                   height={28}
-                  className="h-7 w-auto object-contain"
+                  className="h-7 object-contain"
+                  style={{ width: 'auto' }}
                   unoptimized
                 />
               ))}

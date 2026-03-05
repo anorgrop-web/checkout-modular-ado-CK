@@ -43,19 +43,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <Script
-        src="https://assets.cambioreal.com/card-hash.min.js"
-        strategy="beforeInteractive"
-      />
-      <Script id="microsoft-clarity" strategy="afterInteractive">
-        {`
-          (function(c,l,a,r,i,t,y){
-            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-          })(window, document, "clarity", "script", "ujym7r8xi1");
-        `}
-      </Script>
+      <head>
+        <Script
+          src="https://assets.cambioreal.com/card-hash.min.js"
+          strategy="beforeInteractive"
+        />
+        <Script id="microsoft-clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "ujym7r8xi1");
+          `}
+        </Script>
+      </head>
       <body className={`font-sans antialiased`}>
         <Suspense fallback={null}>
           <GoogleAdsGtag />

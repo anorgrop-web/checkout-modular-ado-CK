@@ -184,7 +184,8 @@ export default function PixPaymentPage() {
             alt="TitanChef"
             width={60}
             height={40}
-            className="h-10 w-auto"
+            className="h-10"
+            style={{ width: 'auto' }}
           />
         </div>
       </header>

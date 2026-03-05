@@ -7,7 +7,7 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center">
-          <Image src="/titanchef-logo.jpg" alt="TitanChef" width={60} height={40} className="h-10 w-auto" />
+          <Image src="/titanchef-logo.jpg" alt="TitanChef" width={60} height={40} className="h-10" style={{ width: 'auto' }} />
         </div>
 
         {/* Cart Icon */}
