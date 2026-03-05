@@ -221,13 +221,12 @@ export default function PixPaymentPage() {
               <p className="text-sm font-medium text-gray-700 mb-4">Aponte a câmera do seu celular</p>
 
               {qrCodeUrl ? (
-                <Image
-                  src={qrCodeUrl || "/placeholder.svg"}
+                <img
+                  src={qrCodeUrl}
                   alt="QR Code PIX"
                   width={180}
                   height={180}
                   className="mb-4"
-                  unoptimized
                 />
               ) : (
                 <div className="w-44 h-44 bg-gray-200 flex items-center justify-center mb-4 rounded">
@@ -372,13 +371,12 @@ export default function PixPaymentPage() {
               <p className="text-sm font-medium text-gray-700 mb-4">Aponte a câmera do seu celular</p>
 
               {qrCodeUrl ? (
-                <Image
-                  src={qrCodeUrl || "/placeholder.svg"}
+                <img
+                  src={qrCodeUrl}
                   alt="QR Code PIX"
                   width={200}
                   height={200}
                   className="mx-auto"
-                  unoptimized
                 />
               ) : (
                 <div className="w-48 h-48 bg-gray-200 flex items-center justify-center mx-auto rounded">

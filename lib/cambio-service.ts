@@ -123,25 +123,14 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             metadata: params.metadata || {},
         }
 
-        console.log("[v0] CambioReal PIX URL:", `${CAMBIO_API_URL}/service/v1/checkout/request`)
-        console.log("[v0] CambioReal PIX Headers:", JSON.stringify({ "X-APP-ID": CAMBIO_APP_ID ? "SET" : "EMPTY", "X-APP-SECRET": CAMBIO_APP_SECRET ? "SET" : "EMPTY" }))
-
-        const response = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/request`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request`, {
             method: "POST",
             headers: getCambioHeaders(),
             body: JSON.stringify(body),
         })
 
         const responseText = await response.text()
-        console.log("[v0] CambioReal PIX Response Status:", response.status)
-        console.log("=== CAMBIOREAL PIX FULL RESPONSE ===")
-        console.log(responseText)
-        console.log("=== END RESPONSE ===")
-
         const data = JSON.parse(responseText)
-        console.log("=== CAMBIOREAL PIX PARSED DATA ===")
-        console.log(JSON.stringify(data, null, 2))
-        console.log("=== END PARSED DATA ===")
 
         if (!response.ok) {
             return {
@@ -151,20 +140,20 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             }
         }
 
-        // Extrair dados do PIX da resposta
-        const pixInfo = data.pix || data.qr_code || data
+        const tx = data.data?.transaction
+
+        console.log("PIX transaction.number length:", tx?.number?.length || 0)
+        console.log("PIX transaction.barcode length:", tx?.barcode?.length || 0)
 
         return {
             success: true,
-            transactionId: data.id || data.transaction_id || "",
+            transactionId: data.data?.id || "",
             pixData: {
-                code: pixInfo.qr_code_text || pixInfo.code || pixInfo.copy_paste || "",
-                qrCodeUrl: pixInfo.qr_code_url || pixInfo.qr_code_image || pixInfo.image_url || "",
-                expiresAt: pixInfo.expires_at
-                    ? (typeof pixInfo.expires_at === "number"
-                        ? pixInfo.expires_at
-                        : Math.floor(new Date(pixInfo.expires_at).getTime() / 1000))
-                    : Math.floor(Date.now() / 1000) + 1800, // 30 min default
+                code: tx?.number || "",
+                qrCodeUrl: tx?.barcode || "",
+                expiresAt: tx?.expires_at
+                    ? Math.floor(new Date(tx.expires_at).getTime() / 1000)
+                    : Math.floor(Date.now() / 1000) + 1800,
             },
         }
     } catch (error) {
@@ -220,19 +209,13 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
             metadata: params.metadata || {},
         }
 
-        console.log("[v0] CambioReal Card URL:", `${CAMBIO_API_URL}/service/v1/checkout/request`)
-        console.log("[v0] CambioReal Card Headers:", JSON.stringify({ "X-APP-ID": CAMBIO_APP_ID ? "SET" : "EMPTY", "X-APP-SECRET": CAMBIO_APP_SECRET ? "SET" : "EMPTY" }))
-
-        const response = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/request`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request`, {
             method: "POST",
             headers: getCambioHeaders(),
             body: JSON.stringify(body),
         })
 
         const responseText = await response.text()
-        console.log("[v0] CambioReal Card Response Status:", response.status)
-        console.log("[v0] CambioReal Card Response Body (first 200 chars):", responseText.substring(0, 200))
-
         const data = JSON.parse(responseText)
 
         if (!response.ok) {
@@ -269,7 +252,7 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
  */
 export async function getTransactionStatus(transactionId: string): Promise<CambioStatusResponse> {
     try {
-        const response = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/request/${transactionId}`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request/${transactionId}`, {
             method: "GET",
             headers: getCambioHeaders(),
         })
