@@ -237,7 +237,9 @@ export function TitanchefPaymentForm({ visible, totalAmount, personalInfo, addre
           customer_cpf: personalInfo.cpf?.replace(/\D/g, ""),
           customer_phone: personalInfo.celular?.replace(/\D/g, ""),
           address: {
-            street: `${addressInfo.endereco}, ${addressInfo.numero}${addressInfo.complemento ? ` - ${addressInfo.complemento}` : ""}`,
+            street: addressInfo.endereco,
+            number: addressInfo.numero,
+            district: addressInfo.bairro,
             city: addressInfo.cidade,
             state: addressInfo.estado,
             cep: addressInfo.cep,
@@ -348,7 +350,9 @@ export function TitanchefPaymentForm({ visible, totalAmount, personalInfo, addre
           customer_cpf: personalInfo.cpf?.replace(/\D/g, ""),
           customer_phone: personalInfo.celular?.replace(/\D/g, ""),
           address: {
-            street: `${addressInfo.endereco}, ${addressInfo.numero}${addressInfo.complemento ? ` - ${addressInfo.complemento}` : ""}`,
+            street: addressInfo.endereco,
+            number: addressInfo.numero,
+            district: addressInfo.bairro,
             city: addressInfo.cidade,
             state: addressInfo.estado,
             cep: addressInfo.cep,
