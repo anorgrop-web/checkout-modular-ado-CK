@@ -54,6 +54,8 @@ interface CreatePixParams {
     }
     address?: {
         street: string
+        number?: string
+        district?: string
         city: string
         state: string
         cep: string
@@ -76,6 +78,8 @@ interface CreateCardParams {
     }
     address?: {
         street: string
+        number?: string
+        district?: string
         city: string
         state: string
         cep: string
@@ -112,13 +116,14 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
                 name: params.customer.name,
                 email: params.customer.email,
                 document: params.customer.cpf,
+                birth_date: "2000-01-01",
                 phone: params.customer.phone || "",
                 ip: params.customer.ip,
                 ...(params.address && {
                     address: {
                         street: params.address.street,
-                        number: "",
-                        district: "",
+                        number: params.address.number || "",
+                        district: params.address.district || "",
                         city: params.address.city,
                         state: params.address.state,
                         zip_code: params.address.cep.replace(/\D/g, ""),
@@ -145,15 +150,17 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
         const responseText = await response.text()
         const data = JSON.parse(responseText)
 
-        if (!response.ok) {
+        if (!response.ok || data.status === "error") {
             return {
                 success: false,
                 transactionId: "",
-                error: data.message || data.error || "Erro ao gerar PIX",
+                error: data.message || data.errors?.join(", ") || "Erro ao gerar PIX",
             }
         }
 
         console.log("PIX RESPONSE:", JSON.stringify(data, null, 2).substring(0, 1500))
+
+        const tx = data.data?.transaction
 
         return {
             success: true,
@@ -205,13 +212,14 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
                 name: params.customer.name,
                 email: params.customer.email,
                 document: params.customer.cpf,
+                birth_date: "2000-01-01",
                 phone: params.customer.phone || "",
                 ip: params.customer.ip,
                 ...(params.address && {
                     address: {
                         street: params.address.street,
-                        number: "",
-                        district: "",
+                        number: params.address.number || "",
+                        district: params.address.district || "",
                         city: params.address.city,
                         state: params.address.state,
                         zip_code: params.address.cep.replace(/\D/g, ""),

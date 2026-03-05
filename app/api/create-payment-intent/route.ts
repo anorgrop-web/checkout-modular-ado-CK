@@ -47,6 +47,8 @@ export async function POST(request: Request) {
         address: address
           ? {
             street: address.street || "",
+            number: address.number || "",
+            district: address.district || "",
             city: address.city || "",
             state: address.state || "",
             cep: address.cep || "",
@@ -132,6 +134,8 @@ export async function POST(request: Request) {
         address: address
           ? {
             street: address.street || "",
+            number: address.number || "",
+            district: address.district || "",
             city: address.city || "",
             state: address.state || "",
             cep: address.cep || "",
