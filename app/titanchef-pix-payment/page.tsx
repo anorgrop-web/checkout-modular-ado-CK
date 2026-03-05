@@ -32,19 +32,42 @@ export default function TitanchefPixPaymentPage() {
   const [timeRemaining, setTimeRemaining] = useState<string>("")
   const hasTrackedPurchase = useRef(false)
 
-  const pixCode = searchParams.get("code") || ""
-  const qrCodeUrl = searchParams.get("qr") || ""
-  const amount = searchParams.get("amount") || "0"
-  const expiresAt = searchParams.get("expires") || ""
-  const paymentIntentId = searchParams.get("pi") || ""
+  const [pixCode, setPixCode] = useState(searchParams.get("code") || "")
+  const [qrCodeUrl, setQrCodeUrl] = useState(searchParams.get("qr") || "")
+  const [amount, setAmount] = useState(searchParams.get("amount") || "0")
+  const [expiresAt, setExpiresAt] = useState(searchParams.get("expires") || "")
+  const [paymentIntentId, setPaymentIntentId] = useState(searchParams.get("pi") || "")
+  const [customerName, setCustomerName] = useState(searchParams.get("name") || "")
+  const [customerEmail, setCustomerEmail] = useState(searchParams.get("email") || "")
+  const [customerPhone, setCustomerPhone] = useState(searchParams.get("phone") || "")
+  const [customerAddress, setCustomerAddress] = useState(searchParams.get("address") || "")
+  const [customerCity, setCustomerCity] = useState(searchParams.get("city") || "")
+  const [customerState, setCustomerState] = useState(searchParams.get("state") || "")
+  const [customerCep, setCustomerCep] = useState(searchParams.get("cep") || "")
 
-  const customerName = searchParams.get("name") || ""
-  const customerEmail = searchParams.get("email") || ""
-  const customerPhone = searchParams.get("phone") || ""
-  const customerAddress = searchParams.get("address") || ""
-  const customerCity = searchParams.get("city") || ""
-  const customerState = searchParams.get("state") || ""
-  const customerCep = searchParams.get("cep") || ""
+  useEffect(() => {
+    const stored = sessionStorage.getItem("pixData")
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        if (parsed.code) setPixCode(parsed.code)
+        if (parsed.qr) setQrCodeUrl(parsed.qr)
+        if (parsed.amount) setAmount(parsed.amount)
+        if (parsed.expires) setExpiresAt(parsed.expires)
+        if (parsed.pi) setPaymentIntentId(parsed.pi)
+        if (parsed.name) setCustomerName(parsed.name)
+        if (parsed.email) setCustomerEmail(parsed.email)
+        if (parsed.phone) setCustomerPhone(parsed.phone)
+        if (parsed.address) setCustomerAddress(parsed.address)
+        if (parsed.city) setCustomerCity(parsed.city)
+        if (parsed.state) setCustomerState(parsed.state)
+        if (parsed.cep) setCustomerCep(parsed.cep)
+        sessionStorage.removeItem("pixData")
+      } catch (e) {
+        console.error("Erro ao ler pixData do sessionStorage:", e)
+      }
+    }
+  }, [])
 
   const formattedAmount = Number.parseFloat(amount).toFixed(2).replace(".", ",")
 
