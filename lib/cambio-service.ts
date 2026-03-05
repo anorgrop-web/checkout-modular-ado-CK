@@ -123,10 +123,10 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             metadata: params.metadata || {},
         }
 
-        console.log("[v0] CambioReal PIX URL:", `${CAMBIO_API_URL}/service/v2/checkout`)
+        console.log("[v0] CambioReal PIX URL:", `${CAMBIO_API_URL}/service/v1/checkout/request`)
         console.log("[v0] CambioReal PIX Headers:", JSON.stringify({ "X-APP-ID": CAMBIO_APP_ID ? "SET" : "EMPTY", "X-APP-SECRET": CAMBIO_APP_SECRET ? "SET" : "EMPTY" }))
 
-        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/request`, {
             method: "POST",
             headers: getCambioHeaders(),
             body: JSON.stringify(body),
@@ -215,10 +215,10 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
             metadata: params.metadata || {},
         }
 
-        console.log("[v0] CambioReal Card URL:", `${CAMBIO_API_URL}/service/v2/checkout`)
+        console.log("[v0] CambioReal Card URL:", `${CAMBIO_API_URL}/service/v1/checkout/request`)
         console.log("[v0] CambioReal Card Headers:", JSON.stringify({ "X-APP-ID": CAMBIO_APP_ID ? "SET" : "EMPTY", "X-APP-SECRET": CAMBIO_APP_SECRET ? "SET" : "EMPTY" }))
 
-        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/request`, {
             method: "POST",
             headers: getCambioHeaders(),
             body: JSON.stringify(body),
@@ -264,7 +264,7 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
  */
 export async function getTransactionStatus(transactionId: string): Promise<CambioStatusResponse> {
     try {
-        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/${transactionId}`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/request/${transactionId}`, {
             method: "GET",
             headers: getCambioHeaders(),
         })
