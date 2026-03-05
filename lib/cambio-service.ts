@@ -134,9 +134,14 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
 
         const responseText = await response.text()
         console.log("[v0] CambioReal PIX Response Status:", response.status)
-        console.log("[v0] CambioReal PIX Response Body (first 200 chars):", responseText.substring(0, 200))
+        console.log("=== CAMBIOREAL PIX FULL RESPONSE ===")
+        console.log(responseText)
+        console.log("=== END RESPONSE ===")
 
         const data = JSON.parse(responseText)
+        console.log("=== CAMBIOREAL PIX PARSED DATA ===")
+        console.log(JSON.stringify(data, null, 2))
+        console.log("=== END PARSED DATA ===")
 
         if (!response.ok) {
             return {
