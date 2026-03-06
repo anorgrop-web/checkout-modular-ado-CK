@@ -108,7 +108,7 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
         const body = {
             order_id: crypto.randomUUID().substring(0, 12),
             amount: params.amount,
-            currency: "USD",
+            currency: "BRL",
             payment_method: "pix",
             duplicate: 0,
             take_rates: 0,
@@ -168,9 +168,15 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             pixData: {
                 code: tx?.number || "",
                 qrCodeUrl: tx?.barcode || "",
-                expiresAt: tx?.expires_at
-                    ? Math.floor(new Date(tx.expires_at).getTime() / 1000)
-                    : Math.floor(Date.now() / 1000) + 1800,
+                expiresAt: (() => {
+                    if (tx?.expires_at) {
+                        const parsed = new Date(tx.expires_at).getTime()
+                        if (!isNaN(parsed) && parsed > Date.now()) {
+                            return Math.floor(parsed / 1000)
+                        }
+                    }
+                    return Math.floor(Date.now() / 1000) + 1800
+                })(),
             },
         }
     } catch (error) {
@@ -194,7 +200,7 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
         const body = {
             order_id: crypto.randomUUID().substring(0, 12),
             amount: params.amount,
-            currency: "USD",
+            currency: "BRL",
             payment_method: "credit_card",
             duplicate: 0,
             take_rates: 0,
