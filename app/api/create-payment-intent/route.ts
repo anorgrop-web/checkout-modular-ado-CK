@@ -35,6 +35,44 @@ export async function POST(request: Request) {
     if (paymentMethodType === "pix") {
       const cpf = customer_cpf || billingDetails?.tax_id || ""
 
+      // Montar products do catálogo para PIX
+      const route = checkout_route || "/"
+      const catalogEntry = getProductForRoute(route)
+      const pixProducts: Array<{
+        descricao: string
+        base_value: number
+        valor: number
+        qty: number
+        ref: string
+        category: string
+        brand: string
+        sku: string
+      }> = [
+        {
+          descricao: catalogEntry.product.descricao,
+          base_value: catalogEntry.product.base_value,
+          valor: amount,
+          qty: catalogEntry.product.quantidade || 1,
+          ref: catalogEntry.product.ref,
+          category: catalogEntry.product.categoria,
+          brand: catalogEntry.product.marca,
+          sku: catalogEntry.product.sku,
+        },
+      ]
+
+      if (shipping_cost && shipping_cost > 0) {
+        pixProducts.push({
+          descricao: "Frete",
+          base_value: shipping_cost,
+          valor: shipping_cost,
+          qty: 1,
+          ref: shipping_method === "jadlog" ? "FRETE-JADLOG" : shipping_method === "sedex" ? "FRETE-SEDEX" : "FRETE-PAC",
+          category: "Frete",
+          brand: "",
+          sku: "",
+        })
+      }
+
       const result = await createPixTransaction({
         amount,
         customer: {
@@ -54,6 +92,7 @@ export async function POST(request: Request) {
             cep: address.cep || "",
           }
           : undefined,
+        products: pixProducts,
         metadata: {
           customer_name: customer_name || "",
           customer_email: customer_email || "",
