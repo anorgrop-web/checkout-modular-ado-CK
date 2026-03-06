@@ -111,7 +111,7 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
             currency: "BRL",
             payment_method: "pix",
             duplicate: 0,
-            take_rates: 0,
+            take_rates: 1,
             client: {
                 name: params.customer.name,
                 email: params.customer.email,
@@ -203,7 +203,7 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
             currency: "BRL",
             payment_method: "credit_card",
             duplicate: 0,
-            take_rates: 0,
+            take_rates: 1,
             card: {
                 bin: rawBin,
                 brand: detectedBrand,
