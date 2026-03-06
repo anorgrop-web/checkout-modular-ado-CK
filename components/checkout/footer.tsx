@@ -48,7 +48,8 @@ export function Footer() {
                   alt={method.name}
                   width={36}
                   height={24}
-                  className="h-5 w-auto object-contain"
+                  className="h-5 object-contain"
+                  style={{ width: 'auto' }}
                   unoptimized
                 />
               </div>
