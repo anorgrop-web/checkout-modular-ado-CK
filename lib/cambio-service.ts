@@ -60,6 +60,16 @@ interface CreatePixParams {
         state: string
         cep: string
     }
+    products?: Array<{
+        descricao: string
+        base_value: number
+        valor: number
+        qty: number
+        ref: string
+        category: string
+        brand: string
+        sku: string
+    }>
     metadata?: Record<string, string>
 }
 
@@ -130,15 +140,20 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
                     },
                 }),
             },
-            products: [
-                {
-                    descricao: "Produto",
-                    base_value: params.amount,
-                    valor: params.amount,
-                    qty: 1,
-                    ref: "PROD-001",
-                },
-            ],
+            products: params.products && params.products.length > 0
+                ? params.products
+                : [
+                    {
+                        descricao: "Produto",
+                        base_value: params.amount,
+                        valor: params.amount,
+                        qty: 1,
+                        ref: "PROD-001",
+                        category: "",
+                        brand: "",
+                        sku: "",
+                    },
+                ],
         }
 
         const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request`, {
@@ -238,6 +253,9 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
                 valor: p.valor,
                 qty: p.quantidade || 1,
                 ref: p.ref || "",
+                category: p.categoria || "",
+                brand: p.marca || "",
+                sku: p.sku || "",
             })),
         }
 
