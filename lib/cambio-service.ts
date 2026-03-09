@@ -299,6 +299,7 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
 
 /**
  * Consulta o status de uma transação na CambioReal.
+ * Usa o token (hash) como identificador no endpoint GET /service/v2/checkout/request/{token}
  */
 export async function getTransactionStatus(transactionId: string): Promise<CambioStatusResponse> {
     try {
@@ -307,7 +308,29 @@ export async function getTransactionStatus(transactionId: string): Promise<Cambi
             headers: getCambioHeaders(),
         })
 
-        const data = await response.json()
+        const responseText = await response.text()
+
+        // Verificar se a resposta é JSON válido (CambioReal pode retornar HTML)
+        if (responseText.startsWith("<!") || responseText.startsWith("<html") || responseText.startsWith("<HTML")) {
+            console.error("CambioReal retornou HTML em getTransactionStatus. transactionId:", transactionId.substring(0, 20))
+            return {
+                status: "pending",
+                paid: false,
+                error: "API retornou resposta inválida",
+            }
+        }
+
+        let data
+        try {
+            data = JSON.parse(responseText)
+        } catch (parseErr) {
+            console.error("Erro ao parsear JSON de status:", responseText.substring(0, 300))
+            return {
+                status: "pending",
+                paid: false,
+                error: "Resposta inválida da API",
+            }
+        }
 
         if (!response.ok) {
             return {
@@ -317,8 +340,12 @@ export async function getTransactionStatus(transactionId: string): Promise<Cambi
             }
         }
 
-        const txStatus = data.status || ""
-        const isPaid = txStatus === "paid" || txStatus === "approved" || txStatus === "succeeded"
+        // Extrair status da transação — a estrutura pode variar
+        const transaction = data.data?.transaction || data.data || {}
+        const txStatus = (transaction.status || data.status || "").toLowerCase()
+        const isPaid = ["paid", "approved", "succeeded", "compensated"].includes(txStatus)
+
+        console.log("getTransactionStatus:", { transactionId: transactionId.substring(0, 16), txStatus, isPaid })
 
         return {
             status: txStatus,
