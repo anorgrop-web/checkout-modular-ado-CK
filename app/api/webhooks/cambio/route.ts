@@ -52,28 +52,58 @@ export async function POST(request: Request) {
                 const addressCep = metadata.address_cep || transaction.address?.zip_code || ""
 
                 try {
-                    const { error: supabaseError } = await supabase.from("pedidos").insert({
-                        codigo_rastreio: transactionId.slice(-8).toUpperCase(),
-                        nome_cliente: customerName,
-                        email_cliente: customerEmail,
-                        cidade_destino: addressCity || "Brasil",
-                        uf_destino: addressState || "BR",
-                        cep: addressCep,
-                        endereco_completo: addressStreet,
-                        data_compra: new Date().toISOString(),
-                        status: "aprovado",
-                        metodo_pagamento: paymentMethod,
-                        valor: (transaction.amount || 0),
-                        transaction_id: transactionId,
-                    })
+                    // Tenta atualizar pedido existente (criado como "pendente" no create-payment-intent)
+                    const { data: existingOrder } = await supabase
+                        .from("pedidos")
+                        .select("id")
+                        .eq("transaction_id", transactionId)
+                        .maybeSingle()
 
-                    if (supabaseError) {
-                        console.error("Erro ao salvar pedido no Supabase:", supabaseError.message)
+                    if (existingOrder) {
+                        const { error: updateError } = await supabase
+                            .from("pedidos")
+                            .update({
+                                status: "aprovado",
+                                codigo_rastreio: transactionId.slice(-8).toUpperCase(),
+                                nome_cliente: customerName || undefined,
+                                email_cliente: customerEmail || undefined,
+                                cidade_destino: addressCity || undefined,
+                                uf_destino: addressState || undefined,
+                                cep: addressCep || undefined,
+                                endereco_completo: addressStreet || undefined,
+                            })
+                            .eq("transaction_id", transactionId)
+
+                        if (updateError) {
+                            console.error("Erro ao atualizar pedido:", updateError.message)
+                        } else {
+                            console.log("Pedido atualizado para aprovado: " + transactionId.slice(-8).toUpperCase())
+                        }
                     } else {
-                        console.log("Pedido salvo: " + transactionId.slice(-8).toUpperCase())
+                        // Pedido não encontrado — inserir como novo (fallback)
+                        const { error: insertError } = await supabase.from("pedidos").insert({
+                            codigo_rastreio: transactionId.slice(-8).toUpperCase(),
+                            nome_cliente: customerName,
+                            email_cliente: customerEmail,
+                            cidade_destino: addressCity || "Brasil",
+                            uf_destino: addressState || "BR",
+                            cep: addressCep,
+                            endereco_completo: addressStreet,
+                            data_compra: new Date().toISOString(),
+                            status: "aprovado",
+                            metodo_pagamento: paymentMethod,
+                            valor: (transaction.amount || 0),
+                            transaction_id: transactionId,
+                        })
+
+                        if (insertError) {
+                            console.error("Erro ao inserir pedido (fallback):", insertError.message)
+                        } else {
+                            console.log("Pedido inserido (fallback): " + transactionId.slice(-8).toUpperCase())
+                        }
                     }
                 } catch (dbErr) {
-                    console.error("Erro no insert do Supabase:", dbErr)
+                    console.error("Erro no upsert do Supabase:", dbErr)
                 }
 
                 if (customerEmail && customerName) {

@@ -28,10 +28,11 @@ export async function GET(request: Request) {
       .order("data_compra", { ascending: false })
 
     if (startDate) {
-      query = query.gte("data_compra", `${startDate}T00:00:00`)
+      // Converte a data local (Brasília UTC-3) para UTC para busca correta no Supabase
+      query = query.gte("data_compra", `${startDate}T03:00:00.000Z`)
     }
     if (endDate) {
-      query = query.lte("data_compra", `${endDate}T23:59:59`)
+      query = query.lte("data_compra", `${endDate}T26:59:59.999Z`)
     }
 
     const { data: pedidos, error: dbError } = await query
@@ -61,10 +62,13 @@ export async function GET(request: Request) {
 
     for (const order of orders) {
       const isPix = order.metodo_pagamento === "pix"
+      const isCard = order.metodo_pagamento === "card"
       const amount = typeof order.valor === "number" ? order.valor : parseFloat(order.valor || "0")
       const isApproved = order.status === "aprovado"
+      const isPending = order.status === "pendente"
 
       if (isPix) {
+        // PIX Gerados = todos os pedidos PIX (pendentes + aprovados)
         pixGeneratedQtd++
         pixGeneratedValue += amount
 
@@ -76,7 +80,7 @@ export async function GET(request: Request) {
         recentPixOrders.push({
           id: order.codigo_rastreio || order.id || "",
           amount,
-          status: isApproved ? "succeeded" : order.status || "pending",
+          status: isApproved ? "succeeded" : isPending ? "requires_action" : order.status || "pending",
           created: order.data_compra
             ? Math.floor(new Date(order.data_compra).getTime() / 1000)
             : Math.floor(Date.now() / 1000),
