@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
 import { createPixTransaction, createCardTransaction } from "@/lib/cambio-service"
 import { getProductForRoute, createShippingProduct } from "@/lib/product-catalog"
 
@@ -109,6 +110,30 @@ export async function POST(request: Request) {
         )
       }
 
+      // Gravar pedido pendente no Supabase (não bloqueia o fluxo se falhar)
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        await supabase.from("pedidos").insert({
+          codigo_rastreio: result.transactionId.slice(-8).toUpperCase(),
+          nome_cliente: customer_name || billingDetails?.name || "",
+          email_cliente: customer_email || billingDetails?.email || "",
+          cidade_destino: address?.city || "",
+          uf_destino: address?.state || "",
+          cep: address?.cep || "",
+          endereco_completo: address ? `${address.street}, ${address.number || ""}` : "",
+          data_compra: new Date().toISOString(),
+          status: "pendente",
+          metodo_pagamento: "pix",
+          valor: amount,
+          transaction_id: result.transactionId,
+        })
+      } catch (dbErr) {
+        console.error("Erro ao salvar pedido pendente (PIX):", dbErr)
+      }
+
       return NextResponse.json({
         success: true,
         paymentIntentId: result.transactionId,
@@ -195,6 +220,30 @@ export async function POST(request: Request) {
           { error: result.error || "Pagamento não aprovado" },
           { status: 400 }
         )
+      }
+
+      // Gravar pedido pendente no Supabase (não bloqueia o fluxo se falhar)
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        await supabase.from("pedidos").insert({
+          codigo_rastreio: result.transactionId.slice(-8).toUpperCase(),
+          nome_cliente: customer_name || "",
+          email_cliente: customer_email || "",
+          cidade_destino: address?.city || "",
+          uf_destino: address?.state || "",
+          cep: address?.cep || "",
+          endereco_completo: address ? `${address.street}, ${address.number || ""}` : "",
+          data_compra: new Date().toISOString(),
+          status: "pendente",
+          metodo_pagamento: "card",
+          valor: amount,
+          transaction_id: result.transactionId,
+        })
+      } catch (dbErr) {
+        console.error("Erro ao salvar pedido pendente (cartão):", dbErr)
       }
 
       return NextResponse.json({
