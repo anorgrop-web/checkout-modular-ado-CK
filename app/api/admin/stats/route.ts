@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       query = query.gte("data_compra", `${startDate}T03:00:00.000Z`)
     }
     if (endDate) {
-      query = query.lte("data_compra", `${endDate}T26:59:59.999Z`)
+      query = query.lte("data_compra", `${endDate}T23:59:59.999Z`)
     }
 
     const { data: pedidos, error: dbError } = await query

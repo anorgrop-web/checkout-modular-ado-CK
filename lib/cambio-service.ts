@@ -107,6 +107,7 @@ function getCambioHeaders(): Record<string, string> {
         "X-APP-ID": CAMBIO_APP_ID,
         "X-APP-SECRET": CAMBIO_APP_SECRET,
         "Content-Type": "application/json",
+        "Authorization": `Basic ${Buffer.from(`${CAMBIO_APP_ID}:${CAMBIO_APP_SECRET}`).toString("base64")}`,
     }
 }
 
@@ -303,7 +304,7 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
  */
 export async function getTransactionStatus(transactionId: string): Promise<CambioStatusResponse> {
     try {
-        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/request/${transactionId}`, {
+        const response = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/get/${transactionId}`, {
             method: "GET",
             headers: getCambioHeaders(),
         })

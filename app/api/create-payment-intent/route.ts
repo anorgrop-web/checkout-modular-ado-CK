@@ -33,6 +33,18 @@ export async function POST(request: Request) {
       billingDetails,
     } = body
 
+    // Bloqueio de e-mails por padrão
+    const blockedEmailPatterns = ["adv", "gov"]
+    const emailToCheck = (customer_email || "").toLowerCase()
+    const isBlockedEmail = blockedEmailPatterns.some(pattern => emailToCheck.includes(pattern))
+
+    if (isBlockedEmail) {
+      return NextResponse.json(
+        { error: "Não foi possível processar o pagamento. Tente novamente mais tarde." },
+        { status: 400 }
+      )
+    }
+
     if (paymentMethodType === "pix") {
       const cpf = customer_cpf || billingDetails?.tax_id || ""
 
