@@ -56,7 +56,19 @@ export default function DashboardPage() {
           headers: { "x-admin-password": "Senhacheckout1!" },
         })
           .then((r) => r.json())
-          .then((data) => setStats(data))
+          .then((data) => {
+            // Garantir valores padrão para evitar erro de toFixed em undefined
+            setStats({
+              pixGeneratedQtd: data.pixGeneratedQtd ?? 0,
+              pixGeneratedValue: data.pixGeneratedValue ?? 0,
+              pixPaidQtd: data.pixPaidQtd ?? 0,
+              pixPaidValue: data.pixPaidValue ?? 0,
+              pixConversionRate: data.pixConversionRate ?? 0,
+              totalRevenue: data.totalRevenue ?? 0,
+              recentPixOrders: data.recentPixOrders ?? [],
+              totalPaymentIntents: data.totalPaymentIntents ?? 0,
+            })
+          })
           .catch(console.error)
       }, 0)
     } else {
@@ -83,7 +95,17 @@ export default function DashboardPage() {
       }
 
       const data = await response.json()
-      setStats(data)
+      // Garantir valores padrão para evitar erro de toFixed em undefined
+      setStats({
+        pixGeneratedQtd: data.pixGeneratedQtd ?? 0,
+        pixGeneratedValue: data.pixGeneratedValue ?? 0,
+        pixPaidQtd: data.pixPaidQtd ?? 0,
+        pixPaidValue: data.pixPaidValue ?? 0,
+        pixConversionRate: data.pixConversionRate ?? 0,
+        totalRevenue: data.totalRevenue ?? 0,
+        recentPixOrders: data.recentPixOrders ?? [],
+        totalPaymentIntents: data.totalPaymentIntents ?? 0,
+      })
     } catch (error) {
       console.error("Error fetching stats:", error)
     } finally {
