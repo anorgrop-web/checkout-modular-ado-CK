@@ -41,14 +41,24 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [stats, setStats] = useState<StatsData | null>(null)
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: startOfMonth(new Date()),
-    to: endOfMonth(new Date()),
+    from: new Date(new Date().setHours(0, 0, 0, 0)),
+    to: new Date(new Date().setHours(23, 59, 59, 999)),
   })
 
   const handleLogin = useCallback(() => {
     if (password === "Senhacheckout1!") {
       setIsAuthenticated(true)
       setPasswordError("")
+      // Busca automática ao fazer login com o período padrão (hoje)
+      setTimeout(() => {
+        const today = format(new Date(), "yyyy-MM-dd")
+        fetch(`/api/admin/stats?startDate=${today}&endDate=${today}`, {
+          headers: { "x-admin-password": "Senhacheckout1!" },
+        })
+          .then((r) => r.json())
+          .then((data) => setStats(data))
+          .catch(console.error)
+      }, 0)
     } else {
       setPasswordError("Senha incorreta")
     }
@@ -103,18 +113,20 @@ export default function DashboardPage() {
 
   const setPresetDateRange = (preset: "today" | "7days" | "30days" | "thisMonth") => {
     const today = new Date()
+    const startOfToday = new Date(today.setHours(0, 0, 0, 0))
+    const endOfToday = new Date(new Date().setHours(23, 59, 59, 999))
     switch (preset) {
       case "today":
-        setDateRange({ from: today, to: today })
+        setDateRange({ from: startOfToday, to: endOfToday })
         break
       case "7days":
-        setDateRange({ from: subDays(today, 7), to: today })
+        setDateRange({ from: subDays(startOfToday, 7), to: endOfToday })
         break
       case "30days":
-        setDateRange({ from: subDays(today, 30), to: today })
+        setDateRange({ from: subDays(startOfToday, 30), to: endOfToday })
         break
       case "thisMonth":
-        setDateRange({ from: startOfMonth(today), to: endOfMonth(today) })
+        setDateRange({ from: startOfMonth(startOfToday), to: endOfMonth(endOfToday) })
         break
     }
   }

@@ -28,10 +28,11 @@ export async function GET(request: Request) {
       .order("data_compra", { ascending: false })
 
     if (startDate) {
-      query = query.gte("data_compra", `${startDate}T00:00:00`)
+      // Converte a data local (Brasília UTC-3) para UTC para busca correta no Supabase
+      query = query.gte("data_compra", `${startDate}T03:00:00.000Z`)
     }
     if (endDate) {
-      query = query.lte("data_compra", `${endDate}T23:59:59`)
+      query = query.lte("data_compra", `${endDate}T26:59:59.999Z`)
     }
 
     const { data: pedidos, error: dbError } = await query
