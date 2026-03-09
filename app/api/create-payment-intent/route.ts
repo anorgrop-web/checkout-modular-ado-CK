@@ -116,8 +116,13 @@ export async function POST(request: Request) {
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!
         )
-        await supabase.from("pedidos").insert({
-          codigo_rastreio: result.transactionId.slice(-8).toUpperCase(),
+        const txId = String(result.transactionId || "")
+        const codigoRastreio = txId.length > 0 
+          ? txId.slice(-8).toUpperCase() 
+          : crypto.randomUUID().substring(0, 8).toUpperCase()
+
+        const { error: dbError } = await supabase.from("pedidos").insert({
+          codigo_rastreio: codigoRastreio,
           nome_cliente: customer_name || billingDetails?.name || "",
           email_cliente: customer_email || billingDetails?.email || "",
           cidade_destino: address?.city || "",
@@ -128,10 +133,16 @@ export async function POST(request: Request) {
           status: "pendente",
           metodo_pagamento: "pix",
           valor: amount,
-          transaction_id: result.transactionId,
+          transaction_id: txId,
         })
+
+        if (dbError) {
+          console.error("SUPABASE INSERT ERROR (PIX):", dbError.message, "| details:", dbError.details, "| hint:", dbError.hint)
+        } else {
+          console.log("Pedido pendente PIX salvo com sucesso. transaction_id:", txId, "codigo_rastreio:", codigoRastreio)
+        }
       } catch (dbErr) {
-        console.error("Erro ao salvar pedido pendente (PIX):", dbErr)
+        console.error("Exceção inesperada ao salvar pedido pendente (PIX):", dbErr)
       }
 
       return NextResponse.json({
@@ -228,8 +239,13 @@ export async function POST(request: Request) {
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
           process.env.SUPABASE_SERVICE_ROLE_KEY!
         )
-        await supabase.from("pedidos").insert({
-          codigo_rastreio: result.transactionId.slice(-8).toUpperCase(),
+        const txId = String(result.transactionId || "")
+        const codigoRastreio = txId.length > 0 
+          ? txId.slice(-8).toUpperCase() 
+          : crypto.randomUUID().substring(0, 8).toUpperCase()
+
+        const { error: dbError } = await supabase.from("pedidos").insert({
+          codigo_rastreio: codigoRastreio,
           nome_cliente: customer_name || "",
           email_cliente: customer_email || "",
           cidade_destino: address?.city || "",
@@ -240,10 +256,16 @@ export async function POST(request: Request) {
           status: "pendente",
           metodo_pagamento: "card",
           valor: amount,
-          transaction_id: result.transactionId,
+          transaction_id: txId,
         })
+
+        if (dbError) {
+          console.error("SUPABASE INSERT ERROR (CARD):", dbError.message, "| details:", dbError.details, "| hint:", dbError.hint)
+        } else {
+          console.log("Pedido pendente CARD salvo com sucesso. transaction_id:", txId, "codigo_rastreio:", codigoRastreio)
+        }
       } catch (dbErr) {
-        console.error("Erro ao salvar pedido pendente (cartão):", dbErr)
+        console.error("Exceção inesperada ao salvar pedido pendente (cartão):", dbErr)
       }
 
       return NextResponse.json({
