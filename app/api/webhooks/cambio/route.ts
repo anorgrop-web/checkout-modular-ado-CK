@@ -19,6 +19,8 @@ export async function POST(request: Request) {
 
         const body = await request.json()
 
+        console.log("WEBHOOK BODY COMPLETO:", JSON.stringify(body, null, 2).substring(0, 3000))
+
         if (WEBHOOK_SECRET) {
             const signature = request.headers.get("x-webhook-signature") ||
                 request.headers.get("x-cambio-signature") || ""
@@ -106,6 +108,17 @@ export async function POST(request: Request) {
                     console.error("Erro no upsert do Supabase:", dbErr)
                 }
 
+                console.log("WEBHOOK DADOS CLIENTE:", {
+                    customerName,
+                    customerEmail,
+                    paymentMethod,
+                    transactionId,
+                    hasMetadata: !!transaction.metadata,
+                    hasClient: !!transaction.client,
+                    metadataKeys: Object.keys(transaction.metadata || {}),
+                    clientKeys: Object.keys(transaction.client || {}),
+                })
+
                 if (customerEmail && customerName) {
                     const address = addressStreet
                         ? {
@@ -136,6 +149,11 @@ export async function POST(request: Request) {
                     } else {
                         console.error("Falha ao enviar e-mail para " + customerEmail + ":", emailResult.error)
                     }
+                } else {
+                    console.error("E-MAIL NÃO ENVIADO - dados faltando:", {
+                        customerEmail: customerEmail || "(vazio)",
+                        customerName: customerName || "(vazio)",
+                    })
                 }
 
                 break
