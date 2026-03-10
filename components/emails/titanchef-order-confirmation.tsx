@@ -86,29 +86,27 @@ export function TitanchefOrderConfirmationEmail({
 
           <Hr style={hr} />
 
-          {/* Products */}
-          {products.length > 0 && (
-            <Section style={productsSection}>
-              <Text style={sectionTitle}>Itens do Pedido</Text>
-              {products.map((product, index) => (
-                <Row key={index} style={productRow}>
-                  <Column style={productName}>
-                    <Text style={productText}>
-                      {product.quantity}x {product.name}
-                    </Text>
-                  </Column>
-                  <Column style={productPrice}>
-                    <Text style={productText}>
-                      {new Intl.NumberFormat("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      }).format(product.price)}
-                    </Text>
-                  </Column>
-                </Row>
-              ))}
-            </Section>
-          )}
+          {/* Products — sempre mostra Kit Tábuas Titanchef */}
+          <Section style={productsSection}>
+            <Text style={sectionTitle}>Itens do Pedido</Text>
+            {(products.length > 0 ? products : [{ name: "Kit Tábuas Titanchef", quantity: 1, price: amount }]).map((product, index) => (
+              <Row key={index} style={productRow}>
+                <Column style={productName}>
+                  <Text style={productText}>
+                    {product.quantity}x {product.name}
+                  </Text>
+                </Column>
+                <Column style={productPrice}>
+                  <Text style={productText}>
+                    {new Intl.NumberFormat("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    }).format(product.price)}
+                  </Text>
+                </Column>
+              </Row>
+            ))}
+          </Section>
 
           {/* Total */}
           <Section style={totalSection}>

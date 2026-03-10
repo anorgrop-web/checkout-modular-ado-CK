@@ -87,6 +87,21 @@ export default async function SuccessPage({ searchParams }: PageProps) {
             <h2 className="text-lg font-bold text-gray-900 mb-4">Detalhes do Pedido</h2>
 
             <div className="space-y-4">
+              {/* Product */}
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                <Package className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900 mb-1">Produto</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-700">Kit Tábuas Titanchef</p>
+                      <p className="text-xs text-gray-500">Qtd: 1</p>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-900">R$ {formattedAmount}</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Customer Info */}
               <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                 <User className="w-5 h-5 text-gray-500 flex-shrink-0 mt-0.5" />
