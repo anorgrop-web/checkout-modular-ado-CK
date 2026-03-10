@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         }
 
         // 2. Consultar a API da CambioReal para obter os dados completos da transação
-        const apiResponse = await fetch(`${CAMBIO_API_URL}/service/v2/checkout/get/${webhookToken}`, {
+        const apiResponse = await fetch(`${CAMBIO_API_URL}/service/v1/checkout/get/${webhookToken}`, {
             method: "GET",
             headers: {
                 "X-APP-ID": CAMBIO_APP_ID,
