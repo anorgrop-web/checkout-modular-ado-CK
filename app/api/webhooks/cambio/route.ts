@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         )
 
         // 4. Processar baseado no status
-        const isPaid = ["paid", "approved", "succeeded", "compensated"].includes(transactionStatus.toLowerCase())
+        const isPaid = ["paid", "approved", "succeeded", "compensated", "solicitacao_pago"].includes(transactionStatus.toLowerCase())
         const isRefused = ["refused", "failed", "declined", "cancelled"].includes(transactionStatus.toLowerCase())
         const isRefunded = ["refunded", "chargedback"].includes(transactionStatus.toLowerCase())
 
