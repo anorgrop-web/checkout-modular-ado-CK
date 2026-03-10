@@ -344,7 +344,7 @@ export async function getTransactionStatus(transactionId: string): Promise<Cambi
         // Extrair status da transação — a estrutura pode variar
         const transaction = data.data?.transaction || data.data || {}
         const txStatus = (transaction.status || data.status || "").toLowerCase()
-        const isPaid = ["paid", "approved", "succeeded", "compensated"].includes(txStatus)
+        const isPaid = ["paid", "approved", "succeeded", "compensated", "solicitacao_pago"].includes(txStatus)
 
         console.log("getTransactionStatus:", { transactionId: transactionId.substring(0, 16), txStatus, isPaid })
 
