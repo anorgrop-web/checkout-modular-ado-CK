@@ -164,7 +164,28 @@ export async function createPixTransaction(params: CreatePixParams): Promise<Cam
         })
 
         const responseText = await response.text()
-        const data = JSON.parse(responseText)
+
+        // Verificar se a CambioReal retornou HTML em vez de JSON (instabilidade temporária)
+        if (responseText.startsWith("<!") || responseText.startsWith("<html") || responseText.startsWith("<HTML")) {
+            console.error("CambioReal retornou HTML na criação de PIX. Resposta:", responseText.substring(0, 200))
+            return {
+                success: false,
+                transactionId: "",
+                error: "Erro temporário no processamento. Tente novamente em alguns segundos.",
+            }
+        }
+
+        let data
+        try {
+            data = JSON.parse(responseText)
+        } catch (parseErr) {
+            console.error("Erro ao parsear resposta da CambioReal (PIX):", responseText.substring(0, 300))
+            return {
+                success: false,
+                transactionId: "",
+                error: "Erro ao processar resposta do pagamento. Tente novamente.",
+            }
+        }
 
         if (!response.ok || data.status === "error") {
             return {
@@ -267,7 +288,30 @@ export async function createCardTransaction(params: CreateCardParams): Promise<C
         })
 
         const responseText = await response.text()
-        const data = JSON.parse(responseText)
+
+        // Verificar se a CambioReal retornou HTML em vez de JSON (instabilidade temporária)
+        if (responseText.startsWith("<!") || responseText.startsWith("<html") || responseText.startsWith("<HTML")) {
+            console.error("CambioReal retornou HTML na criação de cartão. Resposta:", responseText.substring(0, 200))
+            return {
+                success: false,
+                transactionId: "",
+                status: "error",
+                error: "Erro temporário no processamento. Tente novamente em alguns segundos.",
+            }
+        }
+
+        let data
+        try {
+            data = JSON.parse(responseText)
+        } catch (parseErr) {
+            console.error("Erro ao parsear resposta da CambioReal (Cartão):", responseText.substring(0, 300))
+            return {
+                success: false,
+                transactionId: "",
+                status: "error",
+                error: "Erro ao processar resposta do pagamento. Tente novamente.",
+            }
+        }
 
         if (!response.ok) {
             return {
